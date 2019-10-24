@@ -6,6 +6,16 @@ import 'package:rate_my_app/src/dialogs.dart';
 import 'package:rate_my_app/src/style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum RateDialogButton {
+  RateDialogButtonCancel,
+  RateDialogButtonLater,
+  RateDialogButtonRate,
+  // Returned in case when our custom dialog is not shown.
+  RateDialogButtonSkipped,
+}
+
+typedef RateDialogCallback = void Function(RateDialogButton button);
+
 /// Allows to kindly ask users to rate your app if custom conditions are met (eg. install time, number of launches, etc...).
 class RateMyApp {
   /// The plugin channel.
@@ -85,16 +95,20 @@ class RateMyApp {
 
   /// Shows the rate dialog.
   Future<void> showRateDialog(
-    BuildContext context, {
-    String title = 'Rate this app',
-    String message = 'If you like this app, please take a little bit of your time to review it !\nIt really helps us and it shouldn\'t take you more than one minute.',
-    String rateButton = 'RATE',
-    String noButton = 'NO THANKS',
-    String laterButton = 'MAYBE LATER',
-    bool ignoreIOS = false,
-    DialogStyle dialogStyle = const DialogStyle(),
-  }) async {
+      BuildContext context, {
+        String title = 'Rate this app',
+        String message = 'If you like this app, please take a little bit of your time to review it !\nIt really helps us and it shouldn\'t take you more than one minute.',
+        String rateButton = 'RATE',
+        String noButton = 'NO THANKS',
+        String laterButton = 'MAYBE LATER',
+        bool ignoreIOS = false,
+        DialogStyle dialogStyle = const DialogStyle(),
+        RateDialogCallback callback,
+      }) async {
     if (!ignoreIOS && Platform.isIOS && await _CHANNEL.invokeMethod('canRequestReview')) {
+      if (callback != null) {
+        callback(RateDialogButton.RateDialogButtonSkipped);
+      }
       return _CHANNEL.invokeMethod('requestReview');
     }
     return RateMyAppDialog.openDialog(
@@ -106,6 +120,7 @@ class RateMyApp {
       noButton: noButton,
       laterButton: laterButton,
       dialogStyle: dialogStyle,
+      callback: callback,
     );
   }
 

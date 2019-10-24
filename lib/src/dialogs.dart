@@ -26,16 +26,19 @@ class RateMyAppDialog extends StatelessWidget {
   /// The dialog's style.
   final DialogStyle dialogStyle;
 
+  final RateDialogCallback callback;
+
   /// Creates a new rate my app dialog.
   const RateMyAppDialog(
-    this._rateMyApp, {
-    this.title,
-    this.message,
-    this.rateButton,
-    this.noButton,
-    this.laterButton,
-    this.dialogStyle,
-  });
+      this._rateMyApp, {
+        this.title,
+        this.message,
+        this.rateButton,
+        this.noButton,
+        this.laterButton,
+        this.dialogStyle,
+        this.callback,
+      });
 
   @override
   Widget build(BuildContext context) => AlertDialog(
@@ -78,6 +81,9 @@ class RateMyAppDialog extends StatelessWidget {
             Navigator.pop(context);
             _rateMyApp.launchStore();
           });
+          if (callback != null) {
+            callback(RateDialogButton.RateDialogButtonRate);
+          }
         },
       );
 
@@ -90,6 +96,9 @@ class RateMyAppDialog extends StatelessWidget {
           ));
           _rateMyApp.launches -= _rateMyApp.remindLaunches;
           _rateMyApp.save().then((v) => Navigator.pop(context));
+          if (callback != null) {
+            callback(RateDialogButton.RateDialogButtonLater);
+          }
         },
       );
 
@@ -99,20 +108,24 @@ class RateMyAppDialog extends StatelessWidget {
         onPressed: () {
           _rateMyApp.doNotOpenAgain = true;
           _rateMyApp.save().then((v) => Navigator.pop(context));
+          if (callback != null) {
+            callback(RateDialogButton.RateDialogButtonCancel);
+          }
         },
       );
 
   /// Opens the dialog.
   static Future<void> openDialog(
-    BuildContext context,
-    RateMyApp rateMyApp, {
-    String title,
-    String message,
-    String rateButton,
-    String noButton,
-    String laterButton,
-    DialogStyle dialogStyle,
-  }) =>
+      BuildContext context,
+      RateMyApp rateMyApp, {
+        String title,
+        String message,
+        String rateButton,
+        String noButton,
+        String laterButton,
+        DialogStyle dialogStyle,
+        RateDialogCallback callback,
+      }) =>
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -124,6 +137,7 @@ class RateMyAppDialog extends StatelessWidget {
           noButton: noButton,
           laterButton: laterButton,
           dialogStyle: dialogStyle,
+          callback: callback,
         ),
       );
 }
