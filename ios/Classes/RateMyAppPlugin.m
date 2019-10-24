@@ -12,7 +12,9 @@
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   if ([call.method isEqualToString:@"requestReview"]) {
-    [SKStoreReviewController requestReview];
+    if (@available(iOS 10.3, *)) {
+      [SKStoreReviewController requestReview];
+    }
     result(nil);
   }
   else if([call.method isEqualToString:@"canRequestReview"]) {
